@@ -1,10 +1,13 @@
 import pandas as pd
+from Programs import parseHandler
 
 pd.set_option("expand_frame_repr", False)
 
 if __name__ == '__main__':
-    file = open("../Data/news_detail/SH600000.csv","r",encoding="utf-8")
-    df = pd.read_csv(file, encoding="utf-8")
-    print(df)
-    df.dropna(inplace=True)
-    print(df)
+    parser = parseHandler.ParseHandler()
+    df = pd.read_csv("../Data/news/SH600004.csv", encoding="utf-8")
+    urls = df["url"].tolist()
+    url = urls[22]
+    print(url)
+    result = parser.parse(url)
+    print(result)

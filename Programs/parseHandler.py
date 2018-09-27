@@ -19,13 +19,15 @@ class ParseHandler(object,metaclass=ParseHandlerType):
             "http://finance.eastmoney.com":"_parse_eastmoney",
             "http://stock.stockstar.com":"_parse_stockstar",
             "http://stock.10jqka.com.cn":"_parse_10jqka",
+            "http://yuanchuang.10jqka.com.cn":"_parse_yuanchuang_10jqka",
             "http://ggjd.cnstock.com":"_parse_cnstock",
             "http://finance.ce.cn":"_parse_ce",
             "http://stock.jrj.com.cn":"_parse_jrj",
             "http://www.p5w.net":"_parse_p5w",
             "http://www.sohu.com":"_parse_sohu",
             "http://game.people.com.cn":"_parse_people",
-            "http://www.thepaper.cn":"_parse_thepaper"
+            "http://www.thepaper.cn":"_parse_thepaper",
+            "http://sc.stock.cnfol.com":"_parse_cnfol"
         }
 
     def parse(self,url):
@@ -274,4 +276,41 @@ class ParseHandler(object,metaclass=ParseHandlerType):
         }
         return result
 
+    @staticmethod
+    def _parse_yuanchuang_10jqka(byte_html):
+        html = str(byte_html, "gbk", errors='replace')
+        doc = pq(html)
+        # 标题
+        title = doc("body > div.main-content.clearfix > div.main-fl.fl > h2").text()
+        # 日期
+        date = doc("#pubtime_baidu").text()
+        date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        # 内容
+        content = ""
+        p_list = doc("body > div.main-content.clearfix > div.main-fl.fl > div.main-text.atc-content")("p")
+        for p in p_list:
+            content += p.text_content().strip()
+        result = {
+            "title": title, "date": date, "content": content
+        }
+        return result
 
+    @staticmethod
+    def _parse_cnfol(byte_html):
+        """ 图说财经 """
+        html = byte_html.decode()
+        doc = pq(html)
+        # 标题
+        title = doc("body > div.allCnt > div.artMain.mBlock > h3.artTitle").text()
+        # 日期
+        date = doc("body > div.allCnt > div.artMain.mBlock > div.artDes > span:nth-child(2)").text()
+        date = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        # 内容
+        content = ""
+        string_list = doc("body > div.allCnt > div.artMain.mBlock > div.Article").text()
+        for string in string_list:
+            content += string.strip()
+        result = {
+            "title": title, "date": date, "content": content
+        }
+        return result
